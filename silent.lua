@@ -45,3 +45,24 @@ local function GetClosestPlayer()
 
 	return Closest, Distance
 end
+
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(...)
+	local Method = getnamecallmethod()
+	local Arguments = {...}
+
+	if Arguments[1] == workspace and Method == "Raycast" then
+		if typeof(Arguments[#Arguments]) ~= "RaycastParams" then
+			return oldNamecall(...)
+		end
+
+		local HitPart = GetClosestPlayer()
+
+		if HitPart then
+			Arguments[3] = GetDirection(Arguments[2], HitPart.Position)
+			return oldNamecall(unpack(Arguments))
+		end
+	end
+
+	return oldNamecall(...)
+end)
